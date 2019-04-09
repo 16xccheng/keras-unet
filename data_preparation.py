@@ -1,12 +1,3 @@
-#!/usr/bin/env python3.5
-# coding=utf-8
-
-'''
-@date = '17/12/1'
-@author = 'lynnchan'
-@email = 'ccchen706@126.com'
-'''
-
 from __future__ import print_function
 
 import os
@@ -14,17 +5,17 @@ import numpy as np
 
 from skimage.io import imsave, imread
 
-data_path = 'data/'
+data_path = 'keras-unet/data/'# 基本路径
 
-image_rows = 512
-image_cols = 512
+image_rows = 512# 图片尺寸
+image_cols = 512# 图片尺寸
 
 
 def create_train_data():
-    train_data_path = os.path.join(data_path, 'train/Image')
-    train_data_Label_path = os.path.join(data_path, 'train/Label')
+    train_data_path = os.path.join(data_path, 'train/Image')# 原始图集
+    train_data_Label_path = os.path.join(data_path, 'train/Label')# 掩码
     images = os.listdir(train_data_path)
-    total = len(images)
+    total = len(images)# 训练图集数量
 
     imgs = np.ndarray((total, image_rows, image_cols), dtype=np.uint8)
     imgs_mask = np.ndarray((total, image_rows, image_cols), dtype=np.uint8)
@@ -34,9 +25,9 @@ def create_train_data():
     print('Creating training images...')
     print('-'*30)
     for image_name in images:
-        img = imread(os.path.join(train_data_path, image_name), as_grey=True)
-        img_mask = imread(os.path.join(train_data_Label_path, image_name), as_grey=True)
-
+        img      = imread(os.path.join(train_data_path, image_name), as_grey=True)# 修改图片名可于此修改
+        img_mask = imread(os.path.join(train_data_Label_path, image_name), as_grey=True)# 修改图片名可于此修改
+        # 原始图片和掩码图片矩阵
         img = np.array([img])
         img_mask = np.array([img_mask])
 
@@ -94,6 +85,6 @@ def load_test_data():
     imgs_id = np.load('imgs_id_test.npy')
     return imgs_test, imgs_id
 
-if __name__ == '__main__':
-    create_train_data()
-    create_test_data()
+if __name__ == '__main__':# 四个文件
+    create_train_data()# 创建训练图片（原始图片+掩码图片）矩阵（图片数量*图片长*宽）
+    create_test_data()# 同上
