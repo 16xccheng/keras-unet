@@ -1,4 +1,4 @@
-from __future__ import print_function
+﻿from __future__ import print_function
 
 import os
 import numpy as np
@@ -9,6 +9,27 @@ data_path = 'keras-unet/data/'# 基本路径
 
 image_rows = 512# 图片尺寸
 image_cols = 512# 图片尺寸
+
+#24位转8位
+from PIL import Image #（python的一个image图像处理库）
+
+#灰度化
+
+for i in range(37):# train
+    infile = 'keras-unet/data/train/Image/'+str(10064+i)+'.png' #原始图像路径
+    outfile= 'keras-unet/data/train/Image/'+str(10064+i)+'.png' #灰度化后的图像路径
+
+    im = Image.open(infile).convert('L') #灰度化
+    out = im.resize((512,512),Image.ANTIALIAS) #重新定义图片尺寸大小
+    out.save(outfile) #存储图片
+    
+for i in range(18):# test
+    infile = 'keras-unet/data/test/Image/'+str(10061+i)+'.png' #原始图像路径
+    outfile= 'keras-unet/data/test/Image/'+str(10061+i)+'.png' #灰度化后的图像路径
+
+    im = Image.open(infile).convert('L') #灰度化
+    out = im.resize((512,512),Image.ANTIALIAS)
+    out.save(outfile)
 
 
 def create_train_data():
@@ -26,7 +47,7 @@ def create_train_data():
     print('-'*30)
     for image_name in images:
         img      = imread(os.path.join(train_data_path, image_name), as_grey=True)# 修改图片名可于此修改
-        img_mask = imread(os.path.join(train_data_Label_path, image_name), as_grey=True)# 修改图片名可于此修改
+        img_mask = imread(os.path.join(train_data_Label_path, image_name[:-4]+'_mask.png'), as_grey=True)# 修改图片名可于此修改
         # 原始图片和掩码图片矩阵
         img = np.array([img])
         img_mask = np.array([img_mask])
