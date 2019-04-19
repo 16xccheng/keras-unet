@@ -1,111 +1,86 @@
-﻿from __future__ import print_function
+﻿# ########################### 改变测试集需要改变路径#########################
 
+# 读取图片矩阵
+
+from __future__ import print_function
 import os
 import numpy as np
-
 from skimage.io import imsave, imread
 
-data_path = 'keras-unet/data/'# 基本路径
 
 image_rows = 512# 图片尺寸
 image_cols = 512# 图片尺寸
 
-#24位转8位
-from PIL import Image #（python的一个image图像处理库）
+# #############################图片预处理################################
+def create_train_data(train_data_path, train_dir_star, total):
+    #读取训练矩阵  针对train数据    
+    images_list=os.listdir(train_data_path)
+    dir_num=50# 文件夹数
+    max_file=50
+    num=0
+    imgs=np.ndarray((total, image_rows, image_cols), dtype=np.uint8)
+    imgs_mask=np.ndarray((total, image_rows,image_cols), dtype=np.uint8)   
+    for i in range(dir_num):#文件夹数
+        for j in range(max_file):# 文件夹中最大文件数
+            try:
+                img = imread(train_data_path + str(train_dir_star + i) + '/arterial phase/' + str(10001+j) + '.png')
+                img_mask = imread( train_data_path + str(train_dir_star + i) + '/arterial phase/' + str(10001+j) + '_mask.png')
 
-#灰度化
+                img = np.array([img])
+                img_mask = np.array([img_mask])
 
-for i in range(37):# train
-    infile = 'keras-unet/data/train/Image/'+str(10064+i)+'.png' #原始图像路径
-    outfile= 'keras-unet/data/train/Image/'+str(10064+i)+'.png' #灰度化后的图像路径
+                imgs[num] = img
+                imgs_mask[num] = img_mask
 
-    im = Image.open(infile).convert('L') #灰度化
-    out = im.resize((512,512),Image.ANTIALIAS) #重新定义图片尺寸大小
-    out.save(outfile) #存储图片
-    
-for i in range(18):# test
-    infile = 'keras-unet/data/test/Image/'+str(10061+i)+'.png' #原始图像路径
-    outfile= 'keras-unet/data/test/Image/'+str(10061+i)+'.png' #灰度化后的图像路径
-
-    im = Image.open(infile).convert('L') #灰度化
-    out = im.resize((512,512),Image.ANTIALIAS)
-    out.save(outfile)
-
-
-def create_train_data():
-    train_data_path = os.path.join(data_path, 'train/Image')# 原始图集
-    train_data_Label_path = os.path.join(data_path, 'train/Label')# 掩码
-    images = os.listdir(train_data_path)
-    total = len(images)# 训练图集数量
-
-    imgs = np.ndarray((total, image_rows, image_cols), dtype=np.uint8)
-    imgs_mask = np.ndarray((total, image_rows, image_cols), dtype=np.uint8)
-
-    i = 0
-    print('-'*30)
-    print('Creating training images...')
-    print('-'*30)
-    for image_name in images:
-        img      = imread(os.path.join(train_data_path, image_name), as_grey=True)# 修改图片名可于此修改
-        img_mask = imread(os.path.join(train_data_Label_path, image_name[:-4]+'_mask.png'), as_grey=True)# 修改图片名可于此修改
-        # 原始图片和掩码图片矩阵
-        img = np.array([img])
-        img_mask = np.array([img_mask])
-
-        imgs[i] = img
-        imgs_mask[i] = img_mask
-
-        if i % 100 == 0:
-            print('Done: {0}/{1} images'.format(i, total))
-        i += 1
-    print('Loading done.')
-
+                if num % 100 == 0:
+                    print('Done: {0}/{1} images'.format(num, total))
+                num += 1
+            except Exception as e:
+                break
+    print('train数量:'+str(num))
     np.save('imgs_train.npy', imgs)
     np.save('imgs_mask_train.npy', imgs_mask)
     print('Saving to .npy files done.')
-
-
-def load_train_data():
-    imgs_train = np.load('imgs_train.npy')
-    imgs_mask_train = np.load('imgs_mask_train.npy')
-    return imgs_train, imgs_mask_train
-
-
-def create_test_data():
-    train_data_path = os.path.join(data_path, 'test/Image')
-    images = os.listdir(train_data_path)
+    
+    
+def create_test_data(test_data_path):# 针对test1数据集    
+    images = os.listdir(test_data_path)
     total = len(images)
-
+    print(total)
     imgs = np.ndarray((total, image_rows, image_cols), dtype=np.uint8)
     imgs_id = np.ndarray((total, ), dtype=np.int32)
 
-    i = 0
+    num = 0
     print('-'*30)
     print('Creating test images...')
     print('-'*30)
     for image_name in images:
         img_id = int(image_name.split('.')[0])
-        img = imread(os.path.join(train_data_path, image_name), as_grey=True)
+        img = imread(os.path.join(test_data_path, image_name), as_grey=True)
 
         img = np.array([img])
 
-        imgs[i] = img
-        imgs_id[i] = img_id
+        imgs[num] = img
+        imgs_id[num] = img_id
 
-        if i % 100 == 0:
-            print('Done: {0}/{1} images'.format(i, total))
-        i += 1
+        if num % 100 == 0:
+            print('Done: {0}/{1} images'.format(num, total))
+        num += 1
+    print('test数量:' + str(num))
     print('Loading done.')
 
     np.save('imgs_test.npy', imgs)
     np.save('imgs_id_test.npy', imgs_id)
     print('Saving to .npy files done.')
 
-def load_test_data():
-    imgs_test = np.load('imgs_test.npy')
-    imgs_id = np.load('imgs_id_test.npy')
-    return imgs_test, imgs_id
 
 if __name__ == '__main__':# 四个文件
-    create_train_data()# 创建训练图片（原始图片+掩码图片）矩阵（图片数量*图片长*宽）
-    create_test_data()# 同上
+  
+    train_data_path="keras-unet/train2/"  # 训练文件路径
+    train_dir_star = 1051    #1001
+    #total = 1365  
+    total = 1452
+    test_data_path='keras-unet/test1/test1102/Image' # ########################### 改变测试集需要改变路径#########################
+    
+    create_train_data(train_data_path,train_dir_star,total)# 创建训练图片（原始图片+掩码图片）矩阵（图片数量*图片长*宽）
+    create_test_data(test_data_path)# 同上
