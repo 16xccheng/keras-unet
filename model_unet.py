@@ -14,8 +14,8 @@ from keras import backend as K# keras后端   https://keras.io/zh/backend/
 
 K.set_image_data_format('channels_last')  # TF dimension ordering in this code
 
-img_rows = 256# 图像长
-img_cols = 256# 图像宽
+img_rows = 512# 图像长
+img_cols = 512# 图像宽
 
 smooth = 1.
 
@@ -298,7 +298,7 @@ def train_and_predict():
     imgs_mask_train /= 255.  # 矩阵归一化scale masks to [0, 1]
     
     # 图片信息矩阵输入并开始训练
-    #model = get_unet('/opt/bin/unet_weights.h5') #重复训练则读取本文件继续加载训练
+    #model = get_unet('/opt/bin/unet_weights.h5') #重复训练则读取本文件继续加载训练,加载好train1和train2
     
     #model = get_unet()  # 原始unet
     model = get_unetw()  # 原始unetw
@@ -322,7 +322,7 @@ def train_and_predict():
     model.fit(imgs_train, 
               imgs_mask_train, 
               batch_size=16, 
-              nb_epoch=50, # 训练次数
+              nb_epoch=60, # 训练次数
               verbose=1, 
               shuffle=True,
               validation_split=0.2,
